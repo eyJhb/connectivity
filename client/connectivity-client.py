@@ -1,11 +1,12 @@
 import subprocess
 import json
 import time
+import sys
 
 class connectivity_client(object):
-    def __init__(self):
+    def __init__(self, config_file):
         # config
-        self.config = json.loads(self.read_file("config.json"))
+        self.config = json.loads(self.read_file(config_file))
 
         # last run
         self.last_run = 0
@@ -100,6 +101,15 @@ class connectivity_client(object):
                     print("Success")
                 self.last_run = int(time.time())
 
-x = connectivity_client()
+#get arguments
+args = sys.argv
+
+if len(args) != 2:
+    print("python connectivity-client.py config.json")
+    exit()
+
+config_file = args[1]
+
+x = connectivity_client(config_file)
 x.main()
 
