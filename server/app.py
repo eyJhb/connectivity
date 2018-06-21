@@ -42,8 +42,7 @@ def getNames():
 
 @app.route('/', methods=['GET'])
 def home():
-    readings = getReadings()
-    return render_template('index.html', readings=readings)
+    return render_template('index.html')
 
 @app.route('/test', methods=['GET'])
 def test():
