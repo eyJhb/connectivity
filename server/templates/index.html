@@ -13,73 +13,45 @@
 <body>
     <div id="curve_chart" style="width: 1200px; height: 500px"></div>
 <script>
+    var date = (new Date()).toISOString().slice(0,10);
+    var data_set1 = "rpi-wan-eth"
+    var data_set2 = "pf-lan0"
+
     google.charts.load('current', {'packages':['corechart']});
 //    google.charts.setOnLoadCallback(drawChart);
 
     var data;
     var sorted_data = {}
 
-    function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-            ['Date', 'rpi-lan', 'rpi-wan'],
-            ['2004',  1000,      400],
-            ['2005',  1170,      460],
-            ['2006',  660,       1120],
-            ['2007',  1030,      540]
-        ]);
+    function update_data() {
+        axios.get('/api/get_readings?date='+date)
+        .then(function (response) {
+            data = response['data']
+            test()
+        }).catch(function (error) {
+            console.log(error);
+        });
 
-        var options = {
-            title: 'Company Performance',
-            curveType: 'function',
-            legend: { position: 'bottom' }
-        };
+        function test() {
+            console.log("I was called!")
+            console.log(data);
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-        chart.draw(data, options);
-    }
-
-    axios.get('/api/get_readings')
-    .then(function (response) {
-        data = response['data']
-        test()
-    }).catch(function (error) {
-        console.log(error);
-    });
-
-    function test() {
-        console.log("I was called!")
-        console.log(data);
-
-        var cur;
-        for(var i = 0; i < data.length; i++) { 
-            cur = data[i]
-            if(sorted_data[cur[0]] === undefined) {
-                sorted_data[cur[0]] = []
+            var cur;
+            for(var i = 0; i < data.length; i++) { 
+                cur = data[i]
+                if(sorted_data[cur[0]] === undefined) {
+                    sorted_data[cur[0]] = []
+                }
+                sorted_data[cur[0]].push([datetime(cur[1]), cur[3]/1024.0/1024.0]);
             }
-            sorted_data[cur[0]].push([datetime(cur[1]), cur[3]/1024.0/1024.0]);
         }
     }
 
     function datetime(dateString) {
         return dateString.split(" ")[1]
-        var dateTimeParts = dateString.split(' '),
-        timeParts = dateTimeParts[1].split(':'),
-        dateParts = dateTimeParts[0].split('-');
-        var final_date;
-
-        console.log(timeParts)
-        console.log(dateParts)
-        return parseInt(timeParts[0]+timeParts[1]);
-
-        final_date = new Date(dateParts[0], parseInt(dateParts[1], 10) - 1, dateParts[2], timeParts[0], timeParts[1], timeParts[2]);
-        console.log(final_date.getTime()/10000)
-        return final_date.getTime()/10000
     }
 
     function drawChart2() {
-        data_set1 = "rpi-wan-eth"
-        data_set2 = "pf-lan0"
         console.log(data_set1, data_set2)
 
         var data1 = new google.visualization.DataTable();
@@ -98,55 +70,6 @@
         var options = {
             title: 'Network performance',
             //curveType: 'function',
-            legend: { position: 'bottom' },
-            interpolateNulls: true
-        };
-
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-        chart.draw(joinedData, options);
-    }
-
-    function drawChart3() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('number', 'Tid');
-        var index = 0;
-        var data_index = {};
-        for(var key in sorted_data) {
-            if(key.indexOf("lan") !== -1) {
-                continue
-            }
-            data.addColumn('number', key);
-
-            index++;
-        }
-
-        for(var key in sorted_data) {
-            if(key.indexOf("lan") === -1) {
-                continue
-            }
-        }
-
-        console.log(sorted_data['pf-lan0'])
-        console.log(sorted_data['pf-lan1'])
-        return
-
-        var data1 = new google.visualization.DataTable();
-        data1.addColumn('number', 'X');
-        data1.addColumn('number', 'pf-lan0');
-        data1.addRows(sorted_data['pf-lan0'] );
-        console.log(data1)
-
-        var data2 = new google.visualization.DataTable();
-        data2.addColumn('number', 'X');
-        data2.addColumn('number', 'pf-lan1');
-        data2.addRows(sorted_data['pf-lan1'] );
-        console.log(data2)
-        var joinedData = google.visualization.data.join(data1, data2, 'full', [[0,0]], [1], [1]);
-
-        var options = {
-            title: 'Company Performance',
-            curveType: 'function',
             legend: { position: 'bottom' },
             interpolateNulls: true
         };
