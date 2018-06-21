@@ -2,6 +2,7 @@
     "api_url": "http://127.0.0.1:5000",
     "interval": 600,
     "timeout": 15,
+    "test_time": 15,
     "iperf_server": "ping.online.net",
     "iperf_ports": [5200,5201,5202,5203,5204,5205,5206,5207,5208,5209],
     "interfaces": [{"name": "eth", "if": "enp0s25"}]

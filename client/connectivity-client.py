@@ -12,8 +12,8 @@ class connectivity_client(object):
         self.last_run = 0
 
         # cmd
-        self.cmd_iperf3 = "iperf3 -c {0} -p {1} -B {2} -J"
-        self.cmd_iperf3_re = "iperf3 -c {0} -p {1} -B {2} -J -R"
+        self.cmd_iperf3 = "iperf3 -c {0} -p {1} -B {2} -J -t {3}"
+        self.cmd_iperf3_re = "iperf3 -c {0} -p {1} -B {2} -J -t {3} -R"
         self.cmd_curl = 'curl -d "name={0}&date={1}&sent_value={2}&recv_value={3}" -X POST '+self.config['api_url']+'/api/add_reading'
         self.cmd_addr_linux = "ifconfig {0} | perl -n -e'/inet addr:([0-9\.]+)/ && print $1'"
         self.cmd_addr_unix = "ifconfig {0} | perl -n -e'/inet ([0-9\.]+)/ && print $1'"
@@ -48,7 +48,7 @@ class connectivity_client(object):
         server = self.config['iperf_server']
 
         for port in self.config['iperf_ports']:
-            cmd = self.cmd_iperf3.format(server, port, bind_ip)
+            cmd = self.cmd_iperf3.format(server, port, bind_ip, self.config['test_time'])
             cmd = self.exec_cmd(cmd)
 
             if cmd:
