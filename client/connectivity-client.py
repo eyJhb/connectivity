@@ -93,7 +93,7 @@ class connectivity_client(object):
                     result = self.run_test(interface['if'])
                     if not result:
                         print("Could not run test..")
-                        continue
+                        result = [0.0, 0.0]
 
                     if not self.send_reading(interface['name'], result[0], result[1]):
                         print("Could not send data to backend..")
