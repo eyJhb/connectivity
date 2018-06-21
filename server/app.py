@@ -2,7 +2,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import jsonify
-import models as dbHandler
+import sqlite3 as sql
 import json
 
 app = Flask(__name__)
@@ -42,17 +42,17 @@ def getNames():
 
 @app.route('/', methods=['GET'])
 def home():
-    readings = dbHandler.getReadings()
+    readings = getReadings()
     return render_template('index.html', readings=readings)
 
 @app.route('/test', methods=['GET'])
 def test():
-    readings = dbHandler.getReadings()
+    readings = getReadings()
     return render_template('readings.js', readings=readings)
 
 @app.route('/api/get_names', methods=['GET'])
 def get_names():
-    names = dbHandler.getNames()
+    names = getNames()
 
     return jsonify(names), 200
 
@@ -60,9 +60,9 @@ def get_names():
 def get_readings():
     date = request.args.get("date")
     if date:
-        readings = dbHandler.getReadingsDate(date)
+        readings = getReadingsDate(date)
     else:
-        readings = dbHandler.getReadings()
+        readings = getReadings()
 
     return jsonify(readings), 200
 
@@ -72,7 +72,7 @@ def add_reading():
     date = request.form['date']
     sent_value = request.form['sent_value']
     recv_value = request.form['recv_value']
-    test = dbHandler.insertReading(name, date, sent_value, recv_value)
+    test = insertReading(name, date, sent_value, recv_value)
     print(test)
     if not test:
         return jsonify({"success": False, "msg": "Could not add record"}), 500
