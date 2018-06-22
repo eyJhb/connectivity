@@ -16,6 +16,8 @@
     var date = (new Date()).toISOString().slice(0,10);
     var data_set1 = "rpi-wan-eth"
     var data_set2 = "pf-lan0"
+    var data_set3 = "pf-lan1"
+    var data_set4 = "pf-vpn0"
 
     google.charts.load('current', {'packages':['corechart']});
 //    google.charts.setOnLoadCallback(drawChart);
@@ -65,7 +67,22 @@
         data2.addColumn('number', data_set2);
         data2.addRows(sorted_data[data_set2] );
         console.log(data2)
+
+        var data3 = new google.visualization.DataTable();
+        data3.addColumn('string', 'X');
+        data3.addColumn('number', data_set3);
+        data3.addRows(sorted_data[data_set3] );
+        console.log(data3)
+
+        var data4 = new google.visualization.DataTable();
+        data4.addColumn('string', 'X');
+        data4.addColumn('number', data_set4);
+        data4.addRows(sorted_data[data_set4] );
+        console.log(data4)
+
         var joinedData = google.visualization.data.join(data1, data2, 'full', [[0,0]], [1], [1]);
+        var joinedData = google.visualization.data.join(joinedData, data3, 'full', [[0,0]], [1,2], [1]);
+        var joinedData = google.visualization.data.join(joinedData, data4, 'full', [[0,0]], [1,2,3], [1]);
 
         var options = {
             title: 'Network performance',
