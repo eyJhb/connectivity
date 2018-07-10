@@ -24,13 +24,19 @@ class connectivity_client(object):
         f.close()
         return data
 
-    def exec_cmd(self, cmd):
+    def exec_cmd(self, cmd, get_error = False):
         cmd = "timeout "+str(self.config['timeout'])+" "+cmd
         print("Running - "+cmd)
         try:
             result = subprocess.check_output(cmd, shell=True).strip()
-        except:
+        except subprocess.CalledProcessError as e:
+            if get_error:
+                return [e.returncode, e.output]
+
             return False
+
+        if get_error:
+            return [0, result]
 
         return result
 
@@ -49,22 +55,30 @@ class connectivity_client(object):
 
         for port in self.config['iperf_ports']:
             cmd = self.cmd_iperf3.format(server, port, bind_ip, self.config['test_time'])
-            cmd = self.exec_cmd(cmd)
+            cmd = self.exec_cmd(cmd, get_error = True)
 
-            if cmd:
+            if cmd[0] == 0:
                 break
-            elif "error - the server is busy":
+            elif "the server is busy" in cmd[1]:
                 continue
-            else:
-                return False
+            elif cmd[0] > 100:
+                print("Timeout error")
+                break
 
-        if not cmd:
-            return False
+        if cmd[0] == 0:
+            res = json.loads(cmd[1])
 
-        res = json.loads(cmd)
-
-        sent_value = (res['end']['sum_sent']['bytes']*8.0)/res['end']['sum_sent']['seconds']
-        recv_value = (res['end']['sum_received']['bytes']*8.0)/res['end']['sum_received']['seconds']
+            sent_value = (res['end']['sum_sent']['bytes']*8.0)/res['end']['sum_sent']['seconds']
+            recv_value = (res['end']['sum_received']['bytes']*8.0)/res['end']['sum_received']['seconds']
+        elif "the server is busy" in cmd[1]:
+            sent_value = -10.0
+            recv_value = -10.0
+        elif cmd[0] > 100:
+            sent_value = -20.0
+            recv_value = -20.0
+        else:
+            sent_value = -90.0
+            recv_value = -90.0
 
         return [sent_value, recv_value]
 
