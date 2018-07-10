@@ -2,6 +2,7 @@ import subprocess
 import json
 import time
 import sys
+import random
 
 class connectivity_client(object):
     def __init__(self, config_file):
@@ -53,17 +54,20 @@ class connectivity_client(object):
 
         server = self.config['iperf_server']
 
+        retries = 0
         for port in self.config['iperf_ports']:
-            cmd = self.cmd_iperf3.format(server, port, bind_ip, self.config['test_time'])
-            cmd = self.exec_cmd(cmd, get_error = True)
+            for _ in range(0,8):
+                time.sleep(random.randint(5,10))
+                cmd = self.cmd_iperf3.format(server, port, bind_ip, self.config['test_time'])
+                cmd = self.exec_cmd(cmd, get_error = True)
 
-            if cmd[0] == 0:
-                break
-            elif "the server is busy" in cmd[1]:
-                continue
-            elif cmd[0] > 100:
-                print("Timeout error")
-                break
+                if cmd[0] == 0:
+                    break
+                elif "the server is busy" in cmd[1]:
+                    continue
+                elif cmd[0] > 100:
+                    print("Timeout error")
+                    break
 
         if cmd[0] == 0:
             res = json.loads(cmd[1])
